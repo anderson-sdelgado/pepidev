@@ -7,7 +7,7 @@
  * 
  * @copyright (c) 2013, Robson V. Leite UPINSIDE TECNOLOGIA
  */
-class Conn {
+    class Conn {
 
     /** @var PDO */
     private static $Connect = null;
@@ -18,12 +18,13 @@ class Conn {
      */
     private static function Conectar() {
         try {
-            if (self::$Connect == null):
-                $tns = "  (DESCRIPTION = (ENABLE = BROKEN)(FAILOVER = ON)(LOAD_BALANCE = YES)
-                            (ADDRESS = (PROTOCOL = TCP)(HOST = stafe-scan)(PORT = 1521))
+            if (self::$Connect == null){
+                
+			$tns = "  (DESCRIPTION = (ENABLE = BROKEN)(FAILOVER = ON)(LOAD_BALANCE = YES)
+                            (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.15)(PORT = 1521))
                             (CONNECT_DATA =
                               (SERVER = DEDICATED)
-                              (SERVICE_NAME = STAFE)
+                              (SERVICE_NAME = STAFEDEV)
                               (FAILOVER_MODE =
                                 (TYPE = SELECT)
                                 (METHOD = BASIC)
@@ -33,9 +34,9 @@ class Conn {
                             )
                           )";
             
-            self::$Connect = new PDO("oci:dbname=" . $tns . ';charset=utf8', 'INTERFACE', 'FGBNY946');
+				self::$Connect = new PDO("oci:dbname=" . $tns . ';charset=utf8', 'INTERFACE', 'FGBNY946');
             
-            endif;
+            }
         } catch (PDOException $e) {
             PHPErro($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
             die;
