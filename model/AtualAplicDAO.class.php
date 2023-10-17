@@ -19,14 +19,14 @@ class AtualAplicDAO extends OCI {
     /** @var PDO */
     private $Conn;
 
-    public function verAtual($celular) {
+    public function verAtual($nroAparelho) {
 
         $select = "SELECT "
                         . " COUNT(*) AS QTDE "
                     . " FROM "
-                        . " PEPI_ATUALIZACAO "
+                        . " PEPI_ATUAL "
                     . " WHERE "
-                        . " NUMERO_LINHA = " . $celular;    
+                        . " NRO_APARELHO = " . $nroAparelho;   
 
         $this->Conn = parent::getConn();
         $stid = oci_parse($this->Conn, $select);
@@ -40,21 +40,42 @@ class AtualAplicDAO extends OCI {
         return $v;
         
     }
-    
-    public function insAtual($celular, $va) {
         
-        $sql = "INSERT INTO PEPI_ATUALIZACAO ("
-                    . " NUMERO_LINHA "
-                    . " , VERSAO_ATUAL "
-                    . " , VERSAO_NOVA "
-                    . " , DTHR_ULT_ATUAL "
-                    . " ) "
-                    . " VALUES ("
-                    . " " . $celular
-                    . " , " . $va
-                    . " , " . $va
-                    . " , SYSDATE "
-                    . " )";
+    public function verToken($token) {
+
+        $select = "SELECT "
+                    . " COUNT(*) AS QTDE "
+                . " FROM "
+                    . " PEPI_ATUAL "
+                . " WHERE "
+                    . " TOKEN = '" . $token . "'";
+
+        $this->Conn = parent::getConn();
+        $stid = oci_parse($this->Conn, $select);
+        oci_execute($stid);
+
+        while (oci_fetch($stid)) {
+            $v = oci_result($stid, 'QTDE');
+        }
+
+        oci_free_statement($stid);
+        return $v;
+    }
+
+    public function insAtual($nroAparelho, $versao) {
+        
+        $sql = "INSERT INTO PEPI_ATUAL ("
+                                . " NRO_APARELHO "
+                                . " , VERSAO "
+                                . " , DTHR_ULT_ACESSO "
+                                . " , TOKEN "
+                            . " ) "
+                            . " VALUES ("
+                                . " " . $nroAparelho
+                                . " , '" . $versao . "'"
+                                . " , SYSDATE "
+                                . " , '" . strtoupper(md5('PEPI-VERSAO_' . $versao . '-' . $nroAparelho)) . "'"
+                            . " )";
 
         $this->OCI = parent::getConn();
         $result = oci_parse($this->OCI, $sql);
@@ -62,15 +83,15 @@ class AtualAplicDAO extends OCI {
         
     }
     
-    public function retAtual($celular) {
+    public function retAtual($nroAparelho) {
 
         $select = " SELECT "
                         . " VERSAO_NOVA "
                         . " , VERSAO_ATUAL"
                     . " FROM "
-                        . " PEPI_ATUALIZACAO "
+                        . " PEPI_ATUAL "
                     . " WHERE "
-                        . " NUMERO_LINHA = " . $celular;
+                        . " NRO_APARELHO = " . $nroAparelho;
 
         $this->Conn = parent::getConn();
         $statement = oci_parse($this->Conn, $select);
@@ -80,16 +101,30 @@ class AtualAplicDAO extends OCI {
         return $result;
         
     }
-    
-    public function updAtualNova($celular, $va) {
 
-        $sql = "UPDATE PBM_ATUALIZACAO "
+    public function updAtual($nroAparelho, $versao) {
+
+        $sql = "UPDATE PEPI_ATUAL "
+                            . " SET "
+                                . " VERSAO = '" . $versao . "'"
+                                . " , DTHR_ULT_ACESSO = SYSDATE "
+                                . " , TOKEN = '" . strtoupper(md5('PEPI-VERSAO_' . $versao . '-' . $nroAparelho)) . "'"
+                            . " WHERE "
+                                . " NRO_APARELHO = " . $nroAparelho;
+
+        $this->OCI = parent::getConn();
+        $result = oci_parse($this->OCI, $sql);
+        oci_execute($result);
+        
+    }
+    
+    public function updUltAcesso($nroAparelho) {
+
+        $sql = "UPDATE PEPI_ATUAL "
                         . " SET "
-                        . " VERSAO_ATUAL = TRIM(TO_CHAR(" . $va . ", '99999999D99'))"
-                        . " , VERSAO_NOVA = TRIM(TO_CHAR(" . $va . ", '99999999D99'))"
-                        . " , DTHR_ULT_ATUAL = SYSDATE "
+                            . " DTHR_ULT_ACESSO = SYSDATE "
                         . " WHERE "
-                        . " NUMERO_LINHA = " . $celular;
+                            . " NRO_APARELHO = " . $nroAparelho;
 
         $this->OCI = parent::getConn();
         $result = oci_parse($this->OCI, $sql);
@@ -97,20 +132,24 @@ class AtualAplicDAO extends OCI {
         
     }
 
-    public function updAtual($celular, $va) {
+    public function dataHora() {
 
-        $sql = "UPDATE PBM_ATUALIZACAO "
-                    . " SET "
-                    . " VERSAO_ATUAL = TRIM(TO_CHAR(" . $va . ", '99999999D99'))"
-                    . " , DTHR_ULT_ATUAL = SYSDATE "
-                    . " WHERE "
-                        . " NUMERO_LINHA = " . $celular;
+        $select = " SELECT "
+                        . " TO_CHAR(SYSDATE, 'DD/MM/YYYY HH24:MI') AS DTHR "
+                    . " FROM "
+                        . " DUAL ";
 
-        $this->OCI = parent::getConn();
-        $result = oci_parse($this->OCI, $sql);
-        oci_execute($result);
-        
+
+        $this->Conn = parent::getConn();
+        $stid = oci_parse($this->Conn, $select);
+        oci_execute($stid);
+
+        while (oci_fetch($stid)) {
+            $v = oci_result($stid, 'DTHR');
+        }
+
+        oci_free_statement($stid);
+        return $v;
     }
-    
     
 }

@@ -5,6 +5,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+require_once('../control/AtualAplicCTR.class.php');
 require_once('../model/EPIDAO.class.php');
 require_once('../model/FuncDAO.class.php');
 require_once('../model/MotivoDAO.class.php');
@@ -15,37 +16,55 @@ require_once('../model/MotivoDAO.class.php');
  */
 class BaseDadosCTR {
     
-    public function dadosEPI() {
+    public function dadosEPI($info) {
 
-        $epiDAO = new EPIDAO();
+        $atualAplicCTR = new AtualAplicCTR();
+        
+        if($atualAplicCTR->verifToken($info)){
 
-        $epiDAO->atual();
-        $dados = array("dados"=>$epiDAO->dados());
-        $json_str = json_encode($dados);
+            $epiDAO = new EPIDAO();
 
-        return $json_str;
+            $epiDAO->atual();
+            $dados = array("dados"=>$epiDAO->dados());
+            $json_str = json_encode($dados);
+
+            return $json_str;
+        
+        }
 
     }
     
-    public function dadosFunc() {
+    public function dadosFunc($info) {
 
-        $funcDAO = new FuncDAO();
+        $atualAplicCTR = new AtualAplicCTR();
+        
+        if($atualAplicCTR->verifToken($info)){
+            
+            $funcDAO = new FuncDAO();
 
-        $dados = array("dados"=>$funcDAO->dados());
-        $json_str = json_encode($dados);
+            $dados = array("dados"=>$funcDAO->dados());
+            $json_str = json_encode($dados);
 
-        return $json_str;
+            return $json_str;
+        
+        }
 
     }
 
-    public function dadosMotivo() {
+    public function dadosMotivo($info) {
 
-        $motivoDAO = new MotivoDAO();
+        $atualAplicCTR = new AtualAplicCTR();
+        
+        if($atualAplicCTR->verifToken($info)){
 
-        $dados = array("dados"=>$motivoDAO->dados());
-        $json_str = json_encode($dados);
+            $motivoDAO = new MotivoDAO();
 
-        return $json_str;
+            $dados = array("dados"=>$motivoDAO->dados());
+            $json_str = json_encode($dados);
+
+            return $json_str;
+        
+        }
 
     }
     

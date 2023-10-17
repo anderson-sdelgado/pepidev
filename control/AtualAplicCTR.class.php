@@ -13,42 +13,64 @@ require('../model/AtualAplicDAO.class.php');
  */
 class AtualAplicCTR {
     
-    public function atualAplic($info) {
-
-        $atualAplicDAO = new AtualAplicDAO();
-
+    public function inserirDados($info){
+        
         $jsonObj = json_decode($info['dado']);
         $dados = $jsonObj->dados;
 
         foreach ($dados as $d) {
-            $celular = $d->idCelularAtual;
-            $va = $d->versaoAtual;
+            $nroAparelho = $d->nroAparelho;
+            $versao = $d->versao;
         }
-
-        $retorno = 'N';
-
-        $v = $atualAplicDAO->verAtual($celular);
+        
+        return $this->inserirAtualVersao($nroAparelho, $versao);
+        
+    }
+    
+    public function inserirAtualVersao($nroAparelho, $versao) {
+        $atualAplicDAO = new AtualAplicDAO();
+        $v = $atualAplicDAO->verAtual($nroAparelho);
         if ($v == 0) {
-            $atualAplicDAO->insAtual($celular, $va);
+            $atualAplicDAO->insAtual($nroAparelho, $versao);
         } else {
-            $result = $atualAplicDAO->retAtual($celular);
-            foreach ($result as $item) {
-                $vn = $item['VERSAO_NOVA'];
-                $vab = $item['VERSAO_ATUAL'];
-            }
-            if ($va != $vab) {
-                $atualAplicDAO->updAtualNova($celular, $va);
-            } else {
-                if ($va != $vn) {
-                    $retorno = 'S'; 
-                } else {
-                    if (strcmp($va, $vab) <> 0) {
-                        $atualAplicDAO->updAtual($celular, $va);
-                    }
-                }
-            }
+            $atualAplicDAO->updAtual($nroAparelho, $versao);
         }
-        return $retorno;
+        $dado = array("nroAparelho" => $nroAparelho);
+        return json_encode(array("dados" =>array($dado)));
+    }
+
+    public function verifToken($info){
+        
+        $jsonObj = json_decode($info['dado']);
+        $dados = $jsonObj->dados;
+
+        foreach ($dados as $d) {
+            $token = $d->token;
+        }
+        
+        $atualAplicDAO = new AtualAplicDAO();
+        $v = $atualAplicDAO->verToken($token);
+        
+        if ($v > 0) {
+            return true;
+        } else {
+            return false;
+        }
+        
+    }
+    
+    public function verToken($headers){
+        
+        $token = trim(substr($headers['Authorization'], 6));
+        $atualAplicDAO = new AtualAplicDAO();
+        $v = $atualAplicDAO->verToken($token);
+        
+        if ($v > 0) {
+            return true;
+        } else {
+            return false;
+        }
+        
     }
     
 }
